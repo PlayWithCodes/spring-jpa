@@ -9,7 +9,9 @@ import study.springjpa.dto.MemberDto;
 import study.springjpa.entity.Member;
 import study.springjpa.entity.Team;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -92,12 +94,12 @@ class MemberRepositoryTest {
         memberRepository.save(member2);
 
         //when
-        List<Member> member = memberRepository.findUser("AAA", 10);
+        List<Member> members = memberRepository.findUser("AAA", 10);
 
         //then
-        assertThat(member.get(0).getUsername()).isEqualTo("AAA");
-        assertThat(member.get(0).getAge()).isEqualTo(10);
-        assertThat(member.size()).isEqualTo(1);
+        assertThat(members.get(0).getUsername()).isEqualTo("AAA");
+        assertThat(members.get(0).getAge()).isEqualTo(10);
+        assertThat(members.size()).isEqualTo(1);
     }
 
     @Test
@@ -109,13 +111,13 @@ class MemberRepositoryTest {
         memberRepository.save(member2);
 
         //when
-        List<String> member = memberRepository.findUsernameList();
+        List<String> members = memberRepository.findUsernameList();
 
         //then
-        for (String s : member) {
+        for (String s : members) {
             System.out.println("s = " + s);
         }
-        assertThat(member.size()).isEqualTo(2);
+        assertThat(members.size()).isEqualTo(2);
     }
 
     @Test
@@ -135,11 +137,47 @@ class MemberRepositoryTest {
 
 
         //when
-        List<MemberDto> member = memberRepository.findMemberDto();
+        List<MemberDto> members = memberRepository.findMemberDto();
 
         //then
-        for (MemberDto memberDto : member) {
+        for (MemberDto memberDto : members) {
             System.out.println("memberDto = " + memberDto);
         }
+    }
+
+    @Test
+    public void findByNames() {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        //when
+        List<Member> members = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
+
+        //then
+        for (Member member : members) {
+            System.out.println("member = " + member);
+        }
+    }
+
+    @Test
+    public void returnType() {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+        //when
+        List<Member> listMember = memberRepository.findListByUsername("AAA");
+        Member member = memberRepository.findMemberByUsername("BBB");
+        Optional<Member> optionalMember = memberRepository.findOptionalByUsername("AAA");
+        //then
+        for (Member m : listMember) {
+            System.out.println("m = " + m);
+        }
+        System.out.println("member = " + member);
+        System.out.println("optional member = " + optionalMember);
     }
 }
