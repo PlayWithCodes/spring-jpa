@@ -13,6 +13,7 @@ import study.springjpa.dto.MemberDto;
 import study.springjpa.entity.Member;
 import study.springjpa.entity.Team;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,8 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     public void testMember() {
@@ -243,5 +246,23 @@ class MemberRepositoryTest {
         for (Member member : content) {
             System.out.println("member = " + member);
         }
+    }
+
+    @Test
+    public void bulkUpdate() {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 20));
+        memberRepository.save(new Member("member3", 30));
+        memberRepository.save(new Member("member4", 40));
+        memberRepository.save(new Member("member5", 50));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+        Member member5 = memberRepository.findMemberByUsername("member5");
+        System.out.println("member5 = " + member5);
+
+        //then
+        assertThat(resultCount).isEqualTo(4);
     }
 }
