@@ -265,4 +265,129 @@ class MemberRepositoryTest {
         //then
         assertThat(resultCount).isEqualTo(4);
     }
+
+    @Test
+    public void findMemberLazy() {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+        List<Member> members = memberRepository.findAll();
+        //when
+        for (Member member : members) {
+            System.out.println("member = " + member);
+            System.out.println("member.team.class = " + member.getTeam().getClass());
+            System.out.println("member.team.name = " + member.getTeam().getName());
+        }
+        //then
+    }
+
+    @Test
+    public void findMemberfetchLazy() {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+        List<Member> members = memberRepository.findMemberFetchJoin();
+        //when
+        for (Member member : members) {
+            System.out.println("member = " + member);
+            System.out.println("member.team.class = " + member.getTeam().getClass());
+            System.out.println("member.team.name = " + member.getTeam().getName());
+        }
+        //then
+    }
+
+    @Test
+    public void findMemberEntityGraph() {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+        List<Member> members = memberRepository.findMemberEntityGraph();
+        //when
+        for (Member member : members) {
+            System.out.println("member = " + member);
+            System.out.println("member.team.class = " + member.getTeam().getClass());
+            System.out.println("member.team.name = " + member.getTeam().getName());
+        }
+        //then
+    }
+
+    @Test
+    public void findEntityGraphByUsername() {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+        List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+        //when
+        for (Member member : members) {
+            System.out.println("member = " + member);
+            System.out.println("member.team.class = " + member.getTeam().getClass());
+            System.out.println("member.team.name = " + member.getTeam().getName());
+        }
+        //then
+    }
+
+    @Test
+    public void queryHint() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");
+
+        entityManager.flush();
+
+        //then
+    }
+
+    @Test
+    public void lock() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        List<Member> result = memberRepository.findLockByUsername("member1");
+    }
 }
