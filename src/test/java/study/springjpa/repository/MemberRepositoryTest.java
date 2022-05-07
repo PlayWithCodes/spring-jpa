@@ -438,7 +438,7 @@ class MemberRepositoryTest {
         List<UsernameOnlyDto> resultDto = memberRepository.findDtoProjectionsByUsername("m1", UsernameOnlyDto.class);
         List<NestedClosedProjections> resultNested = memberRepository.findDtoProjectionsByUsername("m1", NestedClosedProjections.class);
 
-
+        //then
         for (UsernameOnly usernameOnly : result) {
             System.out.println("usernameOnly = " + usernameOnly.getUsername());
         }
@@ -451,7 +451,51 @@ class MemberRepositoryTest {
             System.out.println("nested = " + nested.getUsername());
             System.out.println("nested = " + nested.getTeam());
         }
+    }
+
+    @Test
+    public void nativeQuery() {
+        //given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        Member result = memberRepository.findByNativeQuery("m1");
 
         //then
+        System.out.println("result = " + result);
+    }
+
+    @Test
+    public void nativeProjection() {
+        //given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = result.getContent();
+
+        //then
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection.getUsername() = " + memberProjection.getUsername());
+            System.out.println("memberProjection.getTeamName() = " + memberProjection.getTeamName());
+        }
     }
 }
