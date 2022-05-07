@@ -3,10 +3,7 @@ package study.springjpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.springjpa.dto.MemberDto;
@@ -394,5 +391,67 @@ class MemberRepositoryTest {
     @Test
     public void callCustom() {
         List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
+
+    @Test
+    public void queryByExample() {
+        //given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        Member member = new Member("m1");
+        member.setTeam(teamA);
+
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("age");
+        Example<Member> example = Example.of(member, matcher);
+        List<Member> result = memberRepository.findAll(example);
+
+        //then
+        assertThat(result.get(0).getUsername()).isEqualTo("m1");
+    }
+
+    @Test
+    public void projections() {
+        //given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+        List<UsernameOnlyDto> resultDto = memberRepository.findDtoProjectionsByUsername("m1", UsernameOnlyDto.class);
+        List<NestedClosedProjections> resultNested = memberRepository.findDtoProjectionsByUsername("m1", NestedClosedProjections.class);
+
+
+        for (UsernameOnly usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly.getUsername());
+        }
+
+        for (UsernameOnlyDto usernameOnlyDto : resultDto) {
+            System.out.println("usernameOnlyDto = " + usernameOnlyDto.getUsername());
+        }
+
+        for (NestedClosedProjections nested : resultNested) {
+            System.out.println("nested = " + nested.getUsername());
+            System.out.println("nested = " + nested.getTeam());
+        }
+
+        //then
     }
 }
